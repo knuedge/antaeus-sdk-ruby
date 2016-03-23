@@ -16,7 +16,7 @@ module Antaeus
         true
       rescue RestClient::Exception => e
         # TODO make this an actual exception
-        fail "Exceptions::AuthenticationFailure: #{e.response}"
+        fail Exceptions::AuthenticationFailure,  e.response
       end
     end
 
@@ -33,7 +33,7 @@ module Antaeus
           content_type: :json,
           accept: :json,
           headers: {
-            :'X-Api-Token:' => Antaeus.config.api_token
+            :'X-API-Token:' => Antaeus.config.api_token
           }
         )
       end
@@ -43,14 +43,56 @@ module Antaeus
       @rest_client ? true : false
     end
 
+    def delete(uri)
+      client_action do
+        raw[uri].delete
+      end
+    end
+
+    def get(uri)
+      client_action do
+        JSON.load raw[uri].get
+      end
+    end
+
+    def post(uri, data)
+      client_action do
+        JSON.load raw[uri].post(data.to_json)
+      end
+    end
+
+    def put(uri, data)
+      client_action do
+        raw[uri].put data.to_json
+      end
+    end
+
     def raw
       @rest_client
     end
 
-    def get(uri)
-      if connect
-        JSON.load(raw[uri].get)
+    def refresh_token
+      Antaeus.config.api_token = nil
+      @rest_client = nil
+      connect
+    end
+
+    private
+
+    def client_action(&block)
+      begin
+        if connect
+          block.call
+        end
+      rescue RestClient::Exception => e
+        if e.http_code == 401
+          refresh_token
+          retry
+        else
+          fail e
+        end
       end
     end
+
   end
 end

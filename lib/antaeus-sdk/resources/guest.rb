@@ -6,6 +6,11 @@ module Antaeus
       property :phone
       property :citizenship
       property :need_nda
+      property :signed_nda
+      property :need_tcpa
+      property :signed_tcpa
+      property :pin
+      property :created_at
 
       path :all, '/guests'
     end

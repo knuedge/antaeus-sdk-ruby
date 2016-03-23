@@ -103,7 +103,7 @@ module Antaeus
           if item.send(attribute).nil?
             nil
           else
-            item if item.send(attribute).send(comparison_method.to_sym, value)
+            item if item.send(attribute).send(comparison.to_sym, value)
           end
         end.compact,
         @type

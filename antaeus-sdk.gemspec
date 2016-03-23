@@ -9,8 +9,17 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '~> 2.0'
   s.files       = [
     "lib/antaeus-sdk.rb",
+    "lib/antaeus-sdk/api_client.rb",
+    "lib/antaeus-sdk/config.rb",
+    "lib/antaeus-sdk/exception.rb",
+    "lib/antaeus-sdk/exceptions/authentication_failure.rb",
+    "lib/antaeus-sdk/exceptions/invalid_propert.rb",
+    "lib/antaeus-sdk/exceptions/missing_path.rb",
+    "lib/antaeus-sdk/helpers/string.rb",
     "lib/antaeus-sdk/resource.rb",
+    "lib/antaeus-sdk/resource_collection.rb",
     "lib/antaeus-sdk/resources/guest.rb",
+    "lib/antaeus-sdk/resources/group.rb",
     "LICENSE",
     "README.md"
   ]

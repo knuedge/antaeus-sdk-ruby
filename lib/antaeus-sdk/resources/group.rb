@@ -1,8 +1,7 @@
 module Antaeus
   module Resources
     class Group < Resource
-      property :cn
-      property :member
+      delayed_property { Antaeus.config.group_name_attribute || :cn }
 
       path :all, '/groups'
     end
