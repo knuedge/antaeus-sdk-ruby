@@ -27,5 +27,7 @@ Antaeus.config.load # Load config before requiring other classes
 require 'antaeus-sdk/api_client'
 require 'antaeus-sdk/resource'
 require 'antaeus-sdk/resource_collection'
+require 'antaeus-sdk/resources/appointment'
 require 'antaeus-sdk/resources/guest'
 require 'antaeus-sdk/resources/group'
+require 'antaeus-sdk/resources/user'

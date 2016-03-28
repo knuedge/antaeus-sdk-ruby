@@ -6,10 +6,25 @@ module Antaeus
       @properties ||= {}
     end
 
+    # Delayed properties are evaluated when an instance is created
+    # WARNING: Sanity checking of the end-result isn't possible, so use with care
     def self.delayed_property(options = {}, &block)
       @properties ||= {}
 
       @properties[block] = options
+    end
+
+    # Can this type of resource be changed client-side?
+    def self.immutable(status)
+      unless status.is_a?(TrueClass) || status.is_a?(FalseClass)
+        fail 'Exceptions::InvalidImmutabilityStatus'
+      end
+      @immutable = status
+    end
+
+    # Check if a resource class is immutable
+    def self.immutable?
+      @immutable ||= false
     end
 
     # Define a property for a model
@@ -53,10 +68,15 @@ module Antaeus
           end
           @entity[prop.to_s]
         end
-        
+
         # Setter methods
         define_method("#{prop}=".to_sym) do |value|
-          @entity[prop.to_s] = value
+          if immutable?
+            fail "Exceptions::ImmutableModification"
+          else
+            @entity[prop.to_s] = value
+            @tained = true
+          end
         end
       end
     end
@@ -71,8 +91,26 @@ module Antaeus
 
       client = APIClient.instance
       ResourceCollection.new(
-        client.get(this_path)[root].collect {|e| self.new(e, lazy ? true : false)},
+        client.get(this_path)[root].collect do |entities|
+          self.new(
+            entities,
+            lazy: (lazy ? true : false),
+            tainted: false
+          )
+        end,
         self
+      )
+    end
+
+    def self.get(id)
+      fail(Exceptions::MissingPath) unless path_for(:all)
+
+      root = to_underscore(self.name.split('::').last)
+      client = APIClient.instance
+      self.new(
+        client.get("#{path_for(:all)}/#{id}")[root],
+        lazy: false,
+        tainted: false
       )
     end
 
@@ -84,13 +122,32 @@ module Antaeus
       @entity['id']
     end
 
-    def initialize(entity = {}, lazy = false)
-      @entity = entity
-      @lazy   = lazy
+    def immutable?
+      self.class.immutable?
+    end
+
+    def initialize(entity = {}, options = {})
+      @entity  = entity
+      fail 'Exceptions::InvalidOptions' unless options.is_a?(Hash)
+      # Allows lazy-loading if we're told this is a lazy instance
+      #  This means only the minimal attributes were fetched.
+      #  This shouldn't be set by end-users.
+      @lazy    = options.key?(:lazy) ? options[:lazy] : false
+      # This allows local, user-created instances to be differentiated from fetched
+      # instances from the backend API. This shouldn't be set by end-users.
+      @tainted = options.key?(:tainted) ? options[:tainted] : true
+
+      if immutable? && @tainted
+        fail "Exceptions::ImmutableInstance"
+      end
 
       self.class.class_eval do
         gen_property_methods
       end
+    end
+
+    def new?
+      !tainted?
     end
 
     def paths
@@ -104,9 +161,33 @@ module Antaeus
     def reload
       root = to_underscore(self.class.name.split('::').last)
 
-      client  = APIClient.instance
-      @entity = client.get("#{path_for(:all)}/#{id}")[root]
-      @lazy   = false
+      client   = APIClient.instance
+      @entity  = client.get("#{path_for(:all)}/#{id}")[root]
+      @lazy    = false
+      @tainted = false
+    end
+
+    def self.search(query, options = {})
+      is_lazy = options.key?(:lazy) ? options[:lazy] : false
+      request_uri = "#{path_for(:all)}/search?q=#{query.to_s}"
+      request_uri << '&lazy=false' if !is_lazy
+      root = to_underscore(self.name.split('::').last.en.plural)
+
+      client = APIClient.instance
+      ResourceCollection.new(
+        client.get(request_uri)[root].collect do |entities|
+          self.new(
+            entities,
+            lazy: is_lazy,
+            tainted: false
+          )
+        end,
+        self
+      )
+    end
+
+    def tainted?
+      @tainted.dup
     end
 
     def <=>(other)

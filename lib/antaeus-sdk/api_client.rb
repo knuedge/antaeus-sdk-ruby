@@ -87,7 +87,9 @@ module Antaeus
       rescue RestClient::Exception => e
         if e.http_code == 401
           refresh_token
-          retry
+          if connect
+            block.call
+          end
         else
           fail e
         end

@@ -13,6 +13,29 @@ module Antaeus
       property :created_at
 
       path :all, '/guests'
+
+      def appointments
+        client = APIClient.instance
+        ResourceCollection.new(
+          client.get("#{path_for(:all)}/#{id}/appointments")['appointments'].collect do |entity|
+            Appointment.new(
+              entity,
+              lazy: true,
+              tainted: false
+            )
+          end,
+          Antaeus::Resources::Appointment
+        )
+      end
+
+      def available_appointments(location)
+      end
+
+      def verify(email, pin)
+      end
+
+      def upcoming_appointments
+      end
     end
   end
 end

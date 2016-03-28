@@ -18,8 +18,10 @@ Gem::Specification.new do |s|
     "lib/antaeus-sdk/helpers/string.rb",
     "lib/antaeus-sdk/resource.rb",
     "lib/antaeus-sdk/resource_collection.rb",
+    "lib/antaeus-sdk/resources/appointment.rb",
     "lib/antaeus-sdk/resources/guest.rb",
     "lib/antaeus-sdk/resources/group.rb",
+    "lib/antaeus-sdk/resources/user.rb",
     "LICENSE",
     "README.md"
   ]
