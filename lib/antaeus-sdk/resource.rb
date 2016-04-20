@@ -121,7 +121,7 @@ module Antaeus
     end
 
     def destroy
-      fail "Exceptions::ImmutableInstance" if immutable?
+      fail Exceptions::ImmutableInstance if immutable?
       unless new?
         client = APIClient.instance
         client.delete("#{path_for(:all)}/#{id}")
@@ -156,7 +156,7 @@ module Antaeus
       @tainted = options.key?(:tainted) ? options[:tainted] : true
 
       if immutable? && @tainted
-        fail "Exceptions::ImmutableInstance"
+        fail Exceptions::ImmutableInstance
       end
 
       # The 'id' field should not be set manually

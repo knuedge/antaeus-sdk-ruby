@@ -9,7 +9,7 @@ module Antaeus
     attr_reader :type
 
     def initialize(list, type = nil)
-      fail 'Exceptions::InvalidCollection' if list.empty? and type.nil?
+      fail Exceptions::InvalidInput if list.empty? and type.nil?
       @list = list
       if type.nil?
         @type = list.first.class
@@ -51,7 +51,7 @@ module Antaeus
         new_list = @list.dup
         self + (other - self)
       else
-        fail "Exceptions::InvalidInput"
+        fail Exceptions::InvalidInput
       end
     end
 
@@ -101,7 +101,7 @@ module Antaeus
     def where(attribute, value, comparison = '==')
       valid_comparisons = [:'==', :'!=', :>, :'>=', :<, :'<=', :match]
       unless valid_comparisons.include?(comparison.to_sym)
-        fail 'Exceptions::InvalidWhereQuery'
+        fail Exceptions::InvalidWhereQuery
       end
       self.class.new(
         @list.collect do |item|
@@ -138,7 +138,7 @@ module Antaeus
       elsif other.is_a?(Resource)
         new_list.delete_if { |res| res.id == other.id }
       else
-        fail "Exceptions::InvalidInput"
+        fail Exceptions::InvalidInput
       end
       self.class.new(new_list, @type)
     end
@@ -153,7 +153,7 @@ module Antaeus
       elsif other.is_a?(@type)
         self.class.new(@list + [other], @type)
       else
-        fail "Exceptions::InvalidInput"
+        fail Exceptions::InvalidInput
       end
     end
 
@@ -161,7 +161,7 @@ module Antaeus
       if other.class == @type
         @list << other
       else
-        fail "Exceptions::InvalidInput"
+        fail Exceptions::InvalidInput
       end
     end
 
