@@ -5,7 +5,7 @@ Gem::Specification.new do |s|
   s.summary     = "Antaeus Guest Management SDK"
   s.description = "The Ruby SDK for the Antaeus Guest Management SDK"
   s.authors     = ["Jonathan Gnagy"]
-  s.email       = 'jgnagy@intellisis.com'
+  s.email       = 'jgnagy@knuedge.com'
   s.required_ruby_version = '~> 2.0'
   s.files       = [
     "lib/antaeus-sdk.rb",
@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
     "lib/antaeus-sdk/resources/appointment.rb",
     "lib/antaeus-sdk/resources/guest.rb",
     "lib/antaeus-sdk/resources/group.rb",
+    "lib/antaeus-sdk/resources/remote_application.rb",
     "lib/antaeus-sdk/resources/user.rb",
     "LICENSE",
     "README.md"

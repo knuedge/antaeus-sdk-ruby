@@ -55,6 +55,11 @@ module Antaeus
       end
     end
 
+    # Makes #model compatible with the server-side
+    def model
+      type
+    end
+
     # Hacked together #or() method in the same spirit as #where().
     # This method can be chained for multiple / more specific queries.
     #

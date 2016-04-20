@@ -10,7 +10,7 @@ module Antaeus
       property :need_tcpa
       property :signed_tcpa
       property :pin
-      property :created_at
+      property :created_at, read_only: true
 
       path :all, '/guests'
 

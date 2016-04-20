@@ -15,7 +15,6 @@ module Antaeus
         Antaeus.config.api_token = token_data['api_token']
         true
       rescue RestClient::Exception => e
-        # TODO make this an actual exception
         fail Exceptions::AuthenticationFailure,  e.response
       end
     end
@@ -58,6 +57,17 @@ module Antaeus
     def post(uri, data)
       client_action do
         JSON.load raw[uri].post(data.to_json)
+      end
+    end
+
+    def patch(uri, data)
+      client_action do
+        response = raw[uri].patch(data.to_json)
+        if response && !response.empty?
+          JSON.load(response)
+        else
+          true
+        end
       end
     end
 

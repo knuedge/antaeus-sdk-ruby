@@ -69,13 +69,15 @@ module Antaeus
           @entity[prop.to_s]
         end
 
-        # Setter methods
-        define_method("#{prop}=".to_sym) do |value|
-          if immutable?
-            fail "Exceptions::ImmutableModification"
-          else
-            @entity[prop.to_s] = value
-            @tained = true
+        # Setter methods (don't make one for obviously read-only properties)
+        unless prop.match /\?$/ || opts[:read_only]
+          define_method("#{prop}=".to_sym) do |value|
+            if immutable?
+              fail "Exceptions::ImmutableModification"
+            else
+              @entity[prop.to_s] = value
+              @tainted = true
+            end
           end
         end
       end
@@ -118,6 +120,22 @@ module Antaeus
       all(false).where(attribute, value, comparison)
     end
 
+    def destroy
+      fail "Exceptions::ImmutableInstance" if immutable?
+      unless new?
+        client = APIClient.instance
+        client.delete("#{path_for(:all)}/#{id}")
+        @lazy = false
+        @tainted = true
+        @entity.delete('id')
+      end
+      true
+    end
+
+    def fresh?
+      !tainted?
+    end
+
     def id
       @entity['id']
     end
@@ -141,13 +159,18 @@ module Antaeus
         fail "Exceptions::ImmutableInstance"
       end
 
+      # The 'id' field should not be set manually
+      if @entity.key?('id')
+        fail "Exceptions::NewInstanceWithID" unless !@tainted
+      end
+
       self.class.class_eval do
         gen_property_methods
       end
     end
 
     def new?
-      !tainted?
+      !@entity.key?('id')
     end
 
     def paths
@@ -161,10 +184,30 @@ module Antaeus
     def reload
       root = to_underscore(self.class.name.split('::').last)
 
+      if new?
+        # Can't reload a new resource
+        false
+      else
+        client   = APIClient.instance
+        @entity  = client.get("#{path_for(:all)}/#{id}")[root]
+        @lazy    = false
+        @tainted = false
+        true
+      end
+    end
+
+    def save
+      root = to_underscore(self.class.name.split('::').last)
+
       client   = APIClient.instance
-      @entity  = client.get("#{path_for(:all)}/#{id}")[root]
-      @lazy    = false
+      if new?
+        @entity  = client.post("#{path_for(:all)}", @entity)[root]
+        @lazy    = false
+      else
+        client.put("#{path_for(:all)}/#{id}", @entity)
+      end
       @tainted = false
+      true
     end
 
     def self.search(query, options = {})
@@ -187,7 +230,7 @@ module Antaeus
     end
 
     def tainted?
-      @tainted.dup
+      @tainted ? true : false
     end
 
     def <=>(other)

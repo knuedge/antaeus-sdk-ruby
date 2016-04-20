@@ -6,7 +6,8 @@ module Antaeus
       property :contact
       property :departure
       property :location
-      property :created_at
+      property :created_at, read_only: true
+      property :arrived?,   read_only: true
 
       path :all, '/appointments'
 
@@ -24,16 +25,26 @@ module Antaeus
         )
       end
 
-      # Hidden property used to lookup related resource
-      def guest
-        Guest.new(@entity['guest'], lazy: true, tainted: false)
+      # Checkin a Guest
+      def checkin
+        client = APIClient.instance
+        if client.patch("#{path_for(:all)}/#{id}/checkin", {email: guest.email})
+          true
+        else
+          raise 'Exceptions::CheckinFailed'
+        end
       end
 
-      def guest=(guest_name)
-        @entity['guest_id'] = if guest_name.is_a?(Guest)
-          Guest.id
+      # Hidden property used to lookup related resource
+      def guest
+        Guest.get(@entity['guest_id'])
+      end
+
+      def guest=(guest_or_guest_id)
+        @entity['guest_id'] = if guest_or_guest_id.is_a?(Guest)
+          guest_or_guest_id.id
         else
-          guest_name
+          guest_or_guest_id
         end
         @tainted = true
       end
