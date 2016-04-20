@@ -8,6 +8,7 @@ module Antaeus
       property :location
       property :created_at, read_only: true
       property :arrived?,   read_only: true
+      property :approved?,  read_only: true
 
       path :all, '/appointments'
 
@@ -25,6 +26,18 @@ module Antaeus
         )
       end
 
+      # Approve an Appointment
+      def approve
+        client = APIClient.instance
+        if client.patch("#{path_for(:all)}/#{id}/approve", {approve: true})
+          true
+        else
+          raise 'Exceptions::ApprovalChangeFailed'
+        end
+        reload
+        return true
+      end
+
       # Checkin a Guest
       def checkin
         client = APIClient.instance
@@ -33,6 +46,8 @@ module Antaeus
         else
           raise 'Exceptions::CheckinFailed'
         end
+        reload
+        return true
       end
 
       # Hidden property used to lookup related resource
@@ -47,6 +62,18 @@ module Antaeus
           guest_or_guest_id
         end
         @tainted = true
+      end
+
+      # Unapprove an Appointment
+      def unapprove
+        client = APIClient.instance
+        if client.patch("#{path_for(:all)}/#{id}/approve", {approve: false})
+          true
+        else
+          raise 'Exceptions::ApprovalChangeFailed'
+        end
+        reload
+        return true
       end
 
       def user
