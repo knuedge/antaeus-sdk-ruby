@@ -12,6 +12,7 @@ module Antaeus
 
       path :all, '/appointments'
 
+      # A collection of all upcoming appointments
       def self.upcoming
         client = APIClient.instance
         ResourceCollection.new(
@@ -32,7 +33,7 @@ module Antaeus
         if client.patch("#{path_for(:all)}/#{id}/approve", {approve: true})
           true
         else
-          raise 'Exceptions::ApprovalChangeFailed'
+          fail Exceptions::ApprovalChangeFailed
         end
         reload
         return true
@@ -55,6 +56,7 @@ module Antaeus
         Guest.get(@entity['guest_id'])
       end
 
+      # Set the guest associated with this appointment
       def guest=(guest_or_guest_id)
         @entity['guest_id'] = if guest_or_guest_id.is_a?(Guest)
           guest_or_guest_id.id
@@ -70,16 +72,18 @@ module Antaeus
         if client.patch("#{path_for(:all)}/#{id}/approve", {approve: false})
           true
         else
-          raise 'Exceptions::ApprovalChangeFailed'
+          fail Exceptions::ApprovalChangeFailed
         end
         reload
         return true
       end
 
+      # User related to an appointment
       def user
         User.get(contact)
       end
 
+      # Set the user related to an appointment
       def user=(username)
         contact = if username.is_a?(User)
           username.id

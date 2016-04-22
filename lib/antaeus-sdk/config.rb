@@ -34,7 +34,7 @@ class Antaeus::Config < OpenStruct
   end
 
   def merge(data)
-    fail "InvalidConfigData" unless data.is_a?(Hash)
+    fail Exceptions::InvalidConfigData unless data.is_a?(Hash)
     data.each do |k,v|
       self[k.to_sym] = v
     end

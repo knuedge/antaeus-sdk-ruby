@@ -20,6 +20,7 @@ include Antaeus::Helpers
 require 'antaeus-sdk/exception'
 require 'antaeus-sdk/exceptions/authentication_failure'
 require 'antaeus-sdk/exceptions/immutable_instance'
+require 'antaeus-sdk/exceptions/invalid_config_data'
 require 'antaeus-sdk/exceptions/invalid_input'
 require 'antaeus-sdk/exceptions/invalid_property'
 require 'antaeus-sdk/exceptions/invalid_where_query'
