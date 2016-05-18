@@ -7,16 +7,17 @@ module Antaeus
       immutable true
 
       def members
-        client = APIClient.instance
         ResourceCollection.new(
-          client.get("#{path_for(:all)}/#{id}/members")['users'].collect do |entity|
+          @client.get("#{path_for(:all)}/#{id}/members")['users'].collect do |record|
             User.new(
-              entity,
+              entity: record,
               lazy: true,
-              tainted: false
+              tainted: false,
+              client: @client
             )
           end,
-          Antaeus::Resources::User
+          type: Antaeus::Resources::User,
+          client: @client
         )
       end
 

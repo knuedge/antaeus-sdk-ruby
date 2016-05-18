@@ -8,13 +8,17 @@ module Antaeus
     # @return [Class] this is a collection of this {Resource} subclass
     attr_reader :type
 
-    def initialize(list, type = nil)
-      fail Exceptions::InvalidInput if list.empty? and type.nil?
+    def initialize(list, options = {})
+      raise 'Exceptions::InvalidOptions' unless options.is_a?(Hash)
+      fail('Exceptions::MissingAPIClient') unless options[:client]
+      fail('Exceptions::InvalidAPIClient') unless options[:client].is_a?(APIClient)
+      raise Exceptions::InvalidInput if list.empty? and options[:type].nil?
+      @client = options[:client]
       @list = list
-      if type.nil?
-        @type = list.first.class
+      if options[:type]
+        @type = options[:type]
       else
-        @type = type
+        @type = list.first.class
       end
     end
 
@@ -30,7 +34,7 @@ module Antaeus
 
     def first(n = nil)
       if n
-        self.class.new(@list.first(n), @type)
+        self.class.new(@list.first(n), type: @type, client: @client)
       else
         @list.first
       end
@@ -38,7 +42,7 @@ module Antaeus
 
     def last(n = nil)
       if n
-        self.class.new(@list.last(n), @type)
+        self.class.new(@list.last(n), type: @type, client: @client)
       else
         @list.last
       end
@@ -69,11 +73,16 @@ module Antaeus
     #   - allowed options are "'==', '!=', '>', '>=', '<', '<=', and 'match'"
     # @raise [Exceptions::InvalidWhereQuery] if not the right kind of comparison
     # @return [ResourceCollection]
-    def or(attribute, value, comparison = '==')
+    def or(attribute, value, options = {})
+      options[:comparison] ||= '=='
       if empty?
-        @type.where(attribute, value, comparison)
+        @type.where(attribute, value, comparison: options[:comparison], client: @client)
       else
-        merge first.class.where(attribute, value, compariso)
+        merge first.class.where(
+          attribute, value,
+          comparison: options[:comparison],
+          client: @client
+        )
       end
     end
 
@@ -86,7 +95,7 @@ module Antaeus
     # Allow complex sorting like an Array
     # @return [ResourceCollection] sorted collection
     def sort(&block)
-      self.class.new(super(&block), @type)
+      self.class.new(super(&block), type: @type, client: @client)
     end
 
     # Horribly inefficient way to allow querying Resources by their attributes.
@@ -98,9 +107,10 @@ module Antaeus
     #   - allowed options are "'==', '!=', '>', '>=', '<', '<=', and 'match'"
     # @raise [Exceptions::InvalidWhereQuery] if not the right kind of comparison
     # @return [ResourceCollection]
-    def where(attribute, value, comparison = '==')
+    def where(attribute, value, options = {})
       valid_comparisons = [:'==', :'!=', :>, :'>=', :<, :'<=', :match]
-      unless valid_comparisons.include?(comparison.to_sym)
+      options[:comparison] ||= '=='
+      unless valid_comparisons.include?(options[:comparison].to_sym)
         fail Exceptions::InvalidWhereQuery
       end
       self.class.new(
@@ -108,10 +118,11 @@ module Antaeus
           if item.send(attribute).nil?
             nil
           else
-            item if item.send(attribute).send(comparison.to_sym, value)
+            item if item.send(attribute).send(options[:comparison].to_sym, value)
           end
         end.compact,
-        @type
+        type: @type,
+        client: @client
       )
     end
 
@@ -121,7 +132,7 @@ module Antaeus
     # @return [Resource,ResourceCollection] the item at the requested index
     def [](index)
       if index.is_a?(Range)
-        self.class.new(@list[index])
+        self.class.new(@list[index], type: @type, client: @client)
       else
         @list[index]
       end
@@ -138,9 +149,9 @@ module Antaeus
       elsif other.is_a?(Resource)
         new_list.delete_if { |res| res.id == other.id }
       else
-        fail Exceptions::InvalidInput
+        raise Exceptions::InvalidInput
       end
-      self.class.new(new_list, @type)
+      self.class.new(new_list, type: @type, client: @client)
     end
 
     # Return a collection after adding to the original
@@ -149,9 +160,9 @@ module Antaeus
     # @return [ResourceCollection]
     def +(other)
       if other.is_a?(self.class)
-        self.class.new(@list + other.to_a, @type)
+        self.class.new(@list + other.to_a, type: @type, client: @client)
       elsif other.is_a?(@type)
-        self.class.new(@list + [other], @type)
+        self.class.new(@list + [other], type: @type, client: @client)
       else
         fail Exceptions::InvalidInput
       end

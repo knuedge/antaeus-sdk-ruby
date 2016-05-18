@@ -15,23 +15,21 @@ module Antaeus
       path :all, '/guests'
 
       def appointments
-        client = APIClient.instance
         ResourceCollection.new(
-          client.get("#{path_for(:all)}/#{id}/appointments")['appointments'].collect do |entity|
+          @client.get("#{path_for(:all)}/#{id}/appointments")['appointments'].collect do |record|
             Appointment.new(
-              entity,
+              entity: record,
               lazy: true,
-              tainted: false
+              tainted: false,
+              client: @client
             )
           end,
-          Antaeus::Resources::Appointment
+          type: Antaeus::Resources::Appointment,
+          client: @client
         )
       end
 
       def available_appointments(location)
-      end
-
-      def verify(email, pin)
       end
 
       def upcoming_appointments

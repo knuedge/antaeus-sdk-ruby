@@ -1,41 +1,26 @@
 module Antaeus
+  # This class is the actual API client, which is a smart wrapper around RestClient
   class APIClient
-    include Singleton
-
-    def authenticate
-      return true if authenticated?
-      begin
-        raw_token_data = RestClient.post(
-          "#{Antaeus.config.base_url}/users/authenticate",
-          { login: Antaeus.config.login, password: Antaeus.config.password }.to_json,
-          content_type: :json,
-          accept: :json
-        )
-        token_data = JSON.load(raw_token_data)
-        Antaeus.config.api_token = token_data['api_token']
-        true
-      rescue RestClient::Exception => e
-        fail Exceptions::AuthenticationFailure,  e.response
-      end
+    def self.instance
+      new
     end
 
+    def initialize
+    end
+
+    # override this method
+    def authenticate(login, pass)
+      false
+    end
+
+    # override this method
     def authenticated?
-      Antaeus.config.api_token ? true : false
+      false
     end
 
+    # override this method
     def connect
-      return true if connected?
-
-      if authenticate
-        @rest_client = RestClient::Resource.new(
-          Antaeus.config.base_url,
-          content_type: :json,
-          accept: :json,
-          headers: {
-            :'X-API-Token:' => Antaeus.config.api_token
-          }
-        )
-      end
+      false
     end
 
     def connected?
@@ -81,30 +66,22 @@ module Antaeus
       @rest_client
     end
 
+    # This needs to be caught by whatever is using the SDK to get new user creds
     def refresh_token
-      Antaeus.config.api_token = nil
       @rest_client = nil
-      connect
+      raise Exceptions::LoginRequired
     end
 
     private
 
     def client_action(&block)
       begin
-        if connect
-          block.call
-        end
+        yield if connect
       rescue RestClient::Exception => e
-        if e.http_code == 401
-          refresh_token
-          if connect
-            block.call
-          end
-        else
-          fail e
-        end
+        raise e unless e.http_code == 401 # This rescue only helps with token refreshing
+        refresh_token
+        yield if connect
       end
-    end
-
+    end # client_action()
   end
 end

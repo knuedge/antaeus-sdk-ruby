@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'antaeus-sdk'
-  s.version     = '0.0.2'
+  s.version     = '0.0.3'
   s.date        = Time.now.strftime('%Y-%m-%d')
   s.summary     = 'Antaeus Guest Management SDK'
   s.description = 'The Ruby SDK for the Antaeus Guest Management SDK'
@@ -12,13 +12,16 @@ Gem::Specification.new do |s|
     'lib/antaeus-sdk/api_client.rb',
     'lib/antaeus-sdk/config.rb',
     'lib/antaeus-sdk/exception.rb',
+    'lib/antaeus-sdk/exceptions/approval_change_failed.rb',
     'lib/antaeus-sdk/exceptions/authentication_failure.rb',
     'lib/antaeus-sdk/exceptions/immutable_instance.rb',
     'lib/antaeus-sdk/exceptions/invalid_config_data.rb',
     'lib/antaeus-sdk/exceptions/invalid_input.rb',
     'lib/antaeus-sdk/exceptions/invalid_property.rb',
     'lib/antaeus-sdk/exceptions/invalid_where_query.rb',
+    'lib/antaeus-sdk/exceptions/login_required.rb',
     'lib/antaeus-sdk/exceptions/missing_path.rb',
+    'lib/antaeus-sdk/guest_api_client.rb',
     'lib/antaeus-sdk/helpers/string.rb',
     'lib/antaeus-sdk/resource.rb',
     'lib/antaeus-sdk/resource_collection.rb',
@@ -27,6 +30,7 @@ Gem::Specification.new do |s|
     'lib/antaeus-sdk/resources/group.rb',
     'lib/antaeus-sdk/resources/remote_application.rb',
     'lib/antaeus-sdk/resources/user.rb',
+    'lib/antaeus-sdk/user_api_client.rb',
     'LICENSE',
     'README.md'
   ]

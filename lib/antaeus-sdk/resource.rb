@@ -1,5 +1,7 @@
 module Antaeus
+  # A generic API resource
   class Resource
+    attr_accessor :client
     include Comparable
 
     def self.properties
@@ -7,7 +9,7 @@ module Antaeus
     end
 
     # Delayed properties are evaluated when an instance is created
-    # WARNING: Sanity checking of the end-result isn't possible, so use with care
+    # WARNING: Sanity checking of the end-result isn't possible. Use with care
     def self.delayed_property(options = {}, &block)
       @properties ||= {}
 
@@ -17,7 +19,7 @@ module Antaeus
     # Can this type of resource be changed client-side?
     def self.immutable(status)
       unless status.is_a?(TrueClass) || status.is_a?(FalseClass)
-        fail 'Exceptions::InvalidImmutabilityStatus'
+        raise Exceptions::InvalidInput
       end
       @immutable = status
     end
@@ -28,7 +30,7 @@ module Antaeus
     end
 
     # Define a property for a model
-    # TODO add validations on options and names
+    # TODO: add more validations on options and names
     def self.property(name, options = {})
       @properties ||= {}
 
@@ -38,7 +40,7 @@ module Antaeus
         :'[]'
       ]
       
-      fail(Exception::InvalidProperty) if invalid_prop_names.include?(name.to_sym)
+      raise(Exception::InvalidProperty) if invalid_prop_names.include?(name.to_sym)
       @properties[name.to_sym] = options
     end
 
@@ -56,7 +58,7 @@ module Antaeus
     end
 
     def self.gen_property_methods
-      properties.each do |prop,opts|
+      properties.each do |prop, opts|
         if prop.is_a?(Proc)
           prop = prop.call.to_s.to_sym
         end
@@ -72,59 +74,61 @@ module Antaeus
         # Setter methods (don't make one for obviously read-only properties)
         unless prop.match /\?$/ || opts[:read_only]
           define_method("#{prop}=".to_sym) do |value|
-            if immutable?
-              fail "Exceptions::ImmutableModification"
-            else
-              @entity[prop.to_s] = value
-              @tainted = true
-            end
+            raise 'Exceptions::ImmutableModification' if immutable?
+            @entity[prop.to_s] = value
+            @tainted = true
           end
         end
       end
     end
 
-    def self.all(lazy = true)
-      # TODO use a specialized  API REST client to get things
-      # TODO add validation checks for the required pieces
+    def self.all(options = {})
+      validate_options(options)
+      options[:lazy] = true unless options.key?(:lazy)
+
+      # TODO: add validation checks for the required pieces
       fail(Exceptions::MissingPath) unless path_for(:all)
 
       root = to_underscore(self.name.split('::').last.en.plural)
-      this_path = lazy ? path_for(:all) : "#{path_for(:all)}?lazy=false"
+      this_path = options[:lazy] ? path_for(:all) : "#{path_for(:all)}?lazy=false"
 
-      client = APIClient.instance
       ResourceCollection.new(
-        client.get(this_path)[root].collect do |entities|
+        options[:client].get(this_path)[root].collect do |record|
           self.new(
-            entities,
-            lazy: (lazy ? true : false),
-            tainted: false
+            entity: record,
+            lazy: (options[:lazy] ? true : false),
+            tainted: false,
+            client: options[:client]
           )
         end,
-        self
+        type: self,
+        client: options[:client]
       )
     end
 
-    def self.get(id)
+    def self.get(id, options = {})
+      validate_options(options)
       fail(Exceptions::MissingPath) unless path_for(:all)
 
       root = to_underscore(self.name.split('::').last)
-      client = APIClient.instance
       self.new(
-        client.get("#{path_for(:all)}/#{id}")[root],
+        entity: options[:client].get("#{path_for(:all)}/#{id}")[root],
         lazy: false,
-        tainted: false
+        tainted: false,
+        client: options[:client]
       )
     end
 
-    def self.where(attribute, value, comparison = '==')
-      all(false).where(attribute, value, comparison)
+    def self.where(attribute, value, options = {})
+      validate_options(options)
+      options[:comparison] ||= '=='
+      all(lazy: false, client: options[:client]).where(attribute, value, comparison: options[:comparison])
     end
 
     def destroy
       fail Exceptions::ImmutableInstance if immutable?
       unless new?
-        client = APIClient.instance
-        client.delete("#{path_for(:all)}/#{id}")
+        @client.delete("#{path_for(:all)}/#{id}")
         @lazy = false
         @tainted = true
         @entity.delete('id')
@@ -144,9 +148,13 @@ module Antaeus
       self.class.immutable?
     end
 
-    def initialize(entity = {}, options = {})
-      @entity  = entity
-      fail 'Exceptions::InvalidOptions' unless options.is_a?(Hash)
+    def initialize(options = {})
+      raise 'Exceptions::InvalidOptions' unless options.is_a?(Hash)
+      fail('Exceptions::MissingAPIClient') unless options[:client]
+      fail('Exceptions::InvalidAPIClient') unless options[:client].is_a?(APIClient)
+      fail('Exceptions::MissingEntity') unless options[:entity]
+      fail('Exceptions::InvalidEntity') unless options[:entity].is_a?(Hash)
+      @entity  = options[:entity]
       # Allows lazy-loading if we're told this is a lazy instance
       #  This means only the minimal attributes were fetched.
       #  This shouldn't be set by end-users.
@@ -154,14 +162,16 @@ module Antaeus
       # This allows local, user-created instances to be differentiated from fetched
       # instances from the backend API. This shouldn't be set by end-users.
       @tainted = options.key?(:tainted) ? options[:tainted] : true
+      # This is the API Client used to get data for this resource
+      @client  = options[:client]
 
       if immutable? && @tainted
-        fail Exceptions::ImmutableInstance
+        raise Exceptions::ImmutableInstance
       end
 
       # The 'id' field should not be set manually
       if @entity.key?('id')
-        fail "Exceptions::NewInstanceWithID" unless !@tainted
+        raise 'Exceptions::NewInstanceWithID' unless !@tainted
       end
 
       self.class.class_eval do
@@ -188,8 +198,7 @@ module Antaeus
         # Can't reload a new resource
         false
       else
-        client   = APIClient.instance
-        @entity  = client.get("#{path_for(:all)}/#{id}")[root]
+        @entity  = @client.get("#{path_for(:all)}/#{id}")[root]
         @lazy    = false
         @tainted = false
         true
@@ -199,33 +208,34 @@ module Antaeus
     def save
       root = to_underscore(self.class.name.split('::').last)
 
-      client   = APIClient.instance
       if new?
-        @entity  = client.post("#{path_for(:all)}", @entity)[root]
+        @entity  = @client.post("#{path_for(:all)}", @entity)[root]
         @lazy    = false
       else
-        client.put("#{path_for(:all)}/#{id}", @entity)
+        @client.put("#{path_for(:all)}/#{id}", @entity)
       end
       @tainted = false
       true
     end
 
     def self.search(query, options = {})
+      validate_options(options)
       is_lazy = options.key?(:lazy) ? options[:lazy] : false
-      request_uri = "#{path_for(:all)}/search?q=#{query.to_s}"
+      request_uri = "#{path_for(:all)}/search?q=#{query}"
       request_uri << '&lazy=false' if !is_lazy
       root = to_underscore(self.name.split('::').last.en.plural)
 
-      client = APIClient.instance
       ResourceCollection.new(
-        client.get(request_uri)[root].collect do |entities|
+        options[:client].get(request_uri)[root].collect do |record|
           self.new(
-            entities,
+            entity: record,
             lazy: is_lazy,
-            tainted: false
+            tainted: false,
+            client: options[:client]
           )
         end,
-        self
+        type: self,
+        client: options[:client]
       )
     end
 
@@ -241,8 +251,16 @@ module Antaeus
       elsif id == other.id
         0
       else
-        fail 'Exceptions::InvalidComparison'
+        raise Exceptions::InvalidInput
       end
+    end
+
+    private
+
+    def self.validate_options(options)
+      raise 'Exceptions::InvalidOptions' unless options.is_a?(Hash)
+      fail('Exceptions::MissingAPIClient') unless options[:client]
+      fail('Exceptions::InvalidAPIClient') unless options[:client].is_a?(APIClient)
     end
   end
 end

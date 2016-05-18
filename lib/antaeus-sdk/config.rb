@@ -1,3 +1,4 @@
+# A generic way of constructing a mergeable configuration
 class Antaeus::Config < OpenStruct
   # Construct a base config using the following order of precedence:
   #   * environment variables
@@ -18,11 +19,10 @@ class Antaeus::Config < OpenStruct
     merge defaults
 
     # Then apply the config file, if one exists
-    apprc_dir = File.expand_path(File.join("~", ".antaeus"))
-    config_file = File.expand_path(File.join(apprc_dir, "client.yml"))
-    if File.readable?(config_file)
-      merge YAML.load_file(config_file)
-    end
+    apprc_dir = File.expand_path(File.join('~', '.antaeus'))
+    config_file = File.expand_path(File.join(apprc_dir, 'client.yml'))
+
+    merge YAML.load_file(config_file) if File.readable?(config_file)
 
     # Finally, apply any environment variables specified
     env_conf = {}
@@ -34,13 +34,14 @@ class Antaeus::Config < OpenStruct
   end
 
   def merge(data)
-    fail Exceptions::InvalidConfigData unless data.is_a?(Hash)
-    data.each do |k,v|
+    raise Exceptions::InvalidConfigData unless data.is_a?(Hash)
+    data.each do |k, v|
       self[k.to_sym] = v
     end
   end
 end
-  
+
+# Make the config available as a singleton
 module Antaeus
   class << self
     def config

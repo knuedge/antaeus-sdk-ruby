@@ -13,24 +13,25 @@ module Antaeus
       path :all, '/appointments'
 
       # A collection of all upcoming appointments
-      def self.upcoming
-        client = APIClient.instance
+      def self.upcoming(options = {})
+        validate_options(options)
         ResourceCollection.new(
-          client.get("#{path_for(:all)}/upcoming")['appointments'].collect do |entity|
+          options[:client].get("#{path_for(:all)}/upcoming")['appointments'].collect do |record|
             self.new(
-              entity,
+              entity: record,
               lazy: true,
-              tainted: false
+              tainted: false,
+              client: options[:client]
             )
           end,
-          self
+          type: self,
+          client: options[:client]
         )
       end
 
       # Approve an Appointment
       def approve
-        client = APIClient.instance
-        if client.patch("#{path_for(:all)}/#{id}/approve", {approve: true})
+        if @client.patch("#{path_for(:all)}/#{id}/approve", approve: true)
           true
         else
           fail Exceptions::ApprovalChangeFailed
@@ -41,8 +42,7 @@ module Antaeus
 
       # Checkin a Guest
       def checkin
-        client = APIClient.instance
-        if client.patch("#{path_for(:all)}/#{id}/checkin", {email: guest.email})
+        if @client.patch("#{path_for(:all)}/#{id}/checkin", email: guest.email)
           true
         else
           raise 'Exceptions::CheckinFailed'
@@ -53,7 +53,7 @@ module Antaeus
 
       # Hidden property used to lookup related resource
       def guest
-        Guest.get(@entity['guest_id'])
+        Guest.get(@entity['guest_id'], client: @client)
       end
 
       # Set the guest associated with this appointment
@@ -68,8 +68,7 @@ module Antaeus
 
       # Unapprove an Appointment
       def unapprove
-        client = APIClient.instance
-        if client.patch("#{path_for(:all)}/#{id}/approve", {approve: false})
+        if @client.patch("#{path_for(:all)}/#{id}/approve", approve: false)
           true
         else
           fail Exceptions::ApprovalChangeFailed
@@ -80,7 +79,7 @@ module Antaeus
 
       # User related to an appointment
       def user
-        User.get(contact)
+        User.get(contact, client: @client)
       end
 
       # Set the user related to an appointment
