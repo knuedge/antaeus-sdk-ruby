@@ -9,9 +9,9 @@ module Antaeus
     attr_reader :type
 
     def initialize(list, options = {})
-      raise 'Exceptions::InvalidOptions' unless options.is_a?(Hash)
-      fail('Exceptions::MissingAPIClient') unless options[:client]
-      fail('Exceptions::InvalidAPIClient') unless options[:client].is_a?(APIClient)
+      raise Exceptions::InvalidOptions unless options.is_a?(Hash)
+      raise Exceptions::MissingAPIClient unless options[:client]
+      raise Exceptions::InvalidAPIClient unless options[:client].is_a?(APIClient)
       raise Exceptions::InvalidInput if list.empty? and options[:type].nil?
       @client = options[:client]
       @list = list

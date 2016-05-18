@@ -45,7 +45,7 @@ module Antaeus
         if @client.patch("#{path_for(:all)}/#{id}/checkin", email: guest.email)
           true
         else
-          raise 'Exceptions::CheckinFailed'
+          raise Exceptions::CheckinFailed
         end
         reload
         return true

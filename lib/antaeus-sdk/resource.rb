@@ -74,7 +74,7 @@ module Antaeus
         # Setter methods (don't make one for obviously read-only properties)
         unless prop.match /\?$/ || opts[:read_only]
           define_method("#{prop}=".to_sym) do |value|
-            raise 'Exceptions::ImmutableModification' if immutable?
+            raise Exceptions::ImmutableModification if immutable?
             @entity[prop.to_s] = value
             @tainted = true
           end
@@ -149,11 +149,11 @@ module Antaeus
     end
 
     def initialize(options = {})
-      raise 'Exceptions::InvalidOptions' unless options.is_a?(Hash)
-      fail('Exceptions::MissingAPIClient') unless options[:client]
-      fail('Exceptions::InvalidAPIClient') unless options[:client].is_a?(APIClient)
-      fail('Exceptions::MissingEntity') unless options[:entity]
-      fail('Exceptions::InvalidEntity') unless options[:entity].is_a?(Hash)
+      raise Exceptions::InvalidOptions unless options.is_a?(Hash)
+      raise Exceptions::MissingAPIClient unless options[:client]
+      raise Exceptions::InvalidAPIClient unless options[:client].is_a?(APIClient)
+      raise Exceptions::MissingEntity unless options[:entity]
+      raise Exceptions::InvalidEntity unless options[:entity].is_a?(Hash)
       @entity  = options[:entity]
       # Allows lazy-loading if we're told this is a lazy instance
       #  This means only the minimal attributes were fetched.
@@ -171,7 +171,7 @@ module Antaeus
 
       # The 'id' field should not be set manually
       if @entity.key?('id')
-        raise 'Exceptions::NewInstanceWithID' unless !@tainted
+        raise Exceptions::NewInstanceWithID unless !@tainted
       end
 
       self.class.class_eval do
@@ -258,9 +258,9 @@ module Antaeus
     private
 
     def self.validate_options(options)
-      raise 'Exceptions::InvalidOptions' unless options.is_a?(Hash)
-      fail('Exceptions::MissingAPIClient') unless options[:client]
-      fail('Exceptions::InvalidAPIClient') unless options[:client].is_a?(APIClient)
+      raise Exceptions::InvalidOptions unless options.is_a?(Hash)
+      raise Exceptions::MissingAPIClient unless options[:client]
+      raise Exceptions::InvalidAPIClient unless options[:client].is_a?(APIClient)
     end
   end
 end

@@ -14,13 +14,21 @@ Gem::Specification.new do |s|
     'lib/antaeus-sdk/exception.rb',
     'lib/antaeus-sdk/exceptions/approval_change_failed.rb',
     'lib/antaeus-sdk/exceptions/authentication_failure.rb',
+    'lib/antaeus-sdk/exceptions/checkin_failed.rb',
     'lib/antaeus-sdk/exceptions/immutable_instance.rb',
+    'lib/antaeus-sdk/exceptions/immutable_modification.rb',
+    'lib/antaeus-sdk/exceptions/invalid_api_client.rb',
     'lib/antaeus-sdk/exceptions/invalid_config_data.rb',
+    'lib/antaeus-sdk/exceptions/invalid_entity.rb',
     'lib/antaeus-sdk/exceptions/invalid_input.rb',
+    'lib/antaeus-sdk/exceptions/invalid_options.rb',
     'lib/antaeus-sdk/exceptions/invalid_property.rb',
     'lib/antaeus-sdk/exceptions/invalid_where_query.rb',
     'lib/antaeus-sdk/exceptions/login_required.rb',
+    'lib/antaeus-sdk/exceptions/missing_api_client.rb',
+    'lib/antaeus-sdk/exceptions/missing_entity.rb',
     'lib/antaeus-sdk/exceptions/missing_path.rb',
+    'lib/antaeus-sdk/exceptions/new_instance_with_id.rb',
     'lib/antaeus-sdk/guest_api_client.rb',
     'lib/antaeus-sdk/helpers/string.rb',
     'lib/antaeus-sdk/resource.rb',
@@ -31,8 +39,7 @@ Gem::Specification.new do |s|
     'lib/antaeus-sdk/resources/remote_application.rb',
     'lib/antaeus-sdk/resources/user.rb',
     'lib/antaeus-sdk/user_api_client.rb',
-    'LICENSE',
-    'README.md'
+    'LICENSE'
   ]
   s.license     = 'MIT'
   s.platform    = Gem::Platform::RUBY
