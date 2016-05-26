@@ -21,13 +21,13 @@ module Antaeus
     def set_token(login, token)
       # this should probably be improved to handle race conditions
       @login ||= login
-      Antaeus.config.logins ||= {}
-      Antaeus.config.logins[login] ||= {}
-      Antaeus.config.logins[login][:token] = token
+      @user_data ||= {}
+      @user_data[login] ||= {}
+      @user_data[login][:token] = token
     end
 
     def authenticated?
-      if @login && Antaeus.config.logins[@login] && Antaeus.config.logins[@login][:token]
+      if @login && @user_data[@login] && @user_data[@login][:token]
         true
       else
         false
@@ -43,7 +43,7 @@ module Antaeus
           content_type: :json,
           accept: :json,
           headers: {
-            'X-API-Token:': Antaeus.config.logins[@login][:token]
+            'X-API-Token:': @user_data[@login][:token]
           }
         )
       else

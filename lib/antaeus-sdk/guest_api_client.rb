@@ -21,13 +21,13 @@ module Antaeus
     def set_token(guest, token)
       # this should probably be improved to handle race conditions
       @guest ||= guest
-      Antaeus.config.guests ||= {}
-      Antaeus.config.guests[guest] ||= {}
-      Antaeus.config.guests[guest][:token] = token
+      @guest_data ||= {}
+      @guest_data[guest] ||= {}
+      @guest_data[guest][:token] = token
     end
 
     def authenticated?
-      if @guest && Antaeus.config.guests[@guest] && Antaeus.config.guests[@guest][:token]
+      if @guest && @guest_data[@guest] && @guest_data[@guest][:token]
         true
       else
         false
@@ -43,7 +43,7 @@ module Antaeus
           content_type: :json,
           accept: :json,
           headers: {
-            'X-Guest-Token:': Antaeus.config.guests[@guest][:token]
+            'X-Guest-Token:': @guest_data[@guest][:token]
           }
         )
       else

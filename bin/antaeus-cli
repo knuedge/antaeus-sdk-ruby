@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+
+require 'pry'
+require 'antaeus-sdk'
+
+include Antaeus::Resources
+client = Antaeus::UserAPIClient.instance
+
+puts "Starting up..."
+
+# Create or load a config file
+apprc_dir   = File.expand_path(File.join("~", ".antaeus"))
+config_file = File.expand_path(File.join(apprc_dir, "client.yml"))
+
+if File.readable?(config_file)
+  CONFIG = YAML.load_file(config_file)
+else
+  CONFIG = {
+    group_name_attribute: 'cn',
+    login: 'username',
+    password: 'passw0rd',
+    debug: false
+  }
+  puts "Writing base config to `#{config_file}`"
+  FileUtils.mkdir_p(File.dirname(config_file))
+  File.open(config_file, 'w') {|f| f.write(CONFIG.to_yaml) }
+  puts "Please edit this config before running antaeus-cli"
+  exit 1
+end
+
+Pry.start binding, :prompt => [ proc { "(antaeus)> " }, proc { "(antaeus)*" } ]
