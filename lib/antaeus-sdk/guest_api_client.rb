@@ -26,6 +26,15 @@ module Antaeus
       @guest_data[guest][:token] = token
     end
 
+    # Retrieve the token for a given guest
+    def get_token(guest)
+      return nil unless @guest
+      return nil unless @guest == guest
+      return nil unless @guest_data
+      return nil unless @guest_data[guest]
+      @guest_data[guest][:token] ? @guest_data[guest][:token].dup : nil
+    end
+
     def authenticated?
       if @guest && @guest_data[@guest] && @guest_data[@guest][:token]
         true

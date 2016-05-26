@@ -26,6 +26,15 @@ module Antaeus
       @user_data[login][:token] = token
     end
 
+    # Retrieve the token for a given user
+    def get_token(login)
+      return nil unless @login
+      return nil unless @login == login
+      return nil unless @user_data
+      return nil unless @user_data[login]
+      @user_data[login][:token] ? @user_data[login][:token].dup : nil
+    end
+
     def authenticated?
       if @login && @user_data[@login] && @user_data[@login][:token]
         true
