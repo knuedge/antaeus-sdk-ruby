@@ -152,9 +152,14 @@ module Antaeus
       raise Exceptions::InvalidOptions unless options.is_a?(Hash)
       raise Exceptions::MissingAPIClient unless options[:client]
       raise Exceptions::InvalidAPIClient unless options[:client].is_a?(APIClient)
-      raise Exceptions::MissingEntity unless options[:entity]
-      raise Exceptions::InvalidEntity unless options[:entity].is_a?(Hash)
-      @entity  = options[:entity]
+
+      if options[:entity]
+        raise Exceptions::MissingEntity unless options[:entity]
+        raise Exceptions::InvalidEntity unless options[:entity].is_a?(Hash)
+        @entity = options[:entity]
+      else
+        @entity  = {}
+      end
       # Allows lazy-loading if we're told this is a lazy instance
       #  This means only the minimal attributes were fetched.
       #  This shouldn't be set by end-users.

@@ -8,6 +8,7 @@ Gem::Specification.new do |s|
   s.email       = 'jgnagy@knuedge.com'
   s.required_ruby_version = '~> 2.0'
   s.files       = [
+    'bin/antaeus-cli',
     'lib/antaeus-sdk.rb',
     'lib/antaeus-sdk/api_client.rb',
     'lib/antaeus-sdk/config.rb',
@@ -41,6 +42,8 @@ Gem::Specification.new do |s|
     'lib/antaeus-sdk/user_api_client.rb',
     'LICENSE'
   ]
+  s.executables << 'antaeus-cli'
+  s.bindir      = 'bin'
   s.license     = 'MIT'
   s.platform    = Gem::Platform::RUBY
   s.post_install_message = 'Thanks for installing the Antaeus Ruby SDK!'
@@ -50,9 +53,9 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'crypt',       '~> 2.2'
   s.add_runtime_dependency 'rest-client', '~> 1.8'
   s.add_runtime_dependency 'linguistics', '~> 2.1'
+  s.add_runtime_dependency 'pry',         '~> 0.10'
 
   s.add_development_dependency 'rspec',   '~> 3.1'
-  s.add_development_dependency 'pry',     '~> 0.10'
   s.add_development_dependency 'rubocop', '~> 0.35'
   s.add_development_dependency 'yard',    '~> 0.8'
 end
