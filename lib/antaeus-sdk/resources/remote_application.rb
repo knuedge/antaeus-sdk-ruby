@@ -5,7 +5,7 @@ module Antaeus
       property :ident
       property :app_key
       property :url
-      property :created_at, read_only: true
+      property :created_at, read_only: true, type: :time
 
       path :all, '/remote_applications'
     end

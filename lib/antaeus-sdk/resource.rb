@@ -2,6 +2,7 @@ module Antaeus
   # A generic API resource
   class Resource
     attr_accessor :client
+    attr_reader :errors
     include Comparable
 
     def self.properties
@@ -68,7 +69,11 @@ module Antaeus
           if @lazy && !@entity.key?(prop.to_s)
             reload
           end
-          @entity[prop.to_s]
+          if opts[:type] && opts[:type] == :time
+            @entity[prop.to_s] ? Time.parse(@entity[prop.to_s]) : nil
+          else
+            @entity[prop.to_s]
+          end
         end
 
         # Setter methods (don't make one for obviously read-only properties)
@@ -140,6 +145,16 @@ module Antaeus
       !tainted?
     end
 
+    # ActiveRecord ActiveModel::Name compatibility method
+    def self.human
+      humanize(i18n_key)
+    end
+
+    # ActiveRecord ActiveModel::Name compatibility method
+    def self.i18n_key
+      to_underscore(self.name.split('::').last)
+    end
+
     def id
       @entity['id']
     end
@@ -169,6 +184,7 @@ module Antaeus
       @tainted = options.key?(:tainted) ? options[:tainted] : true
       # This is the API Client used to get data for this resource
       @client  = options[:client]
+      @errors  = {}
 
       if immutable? && @tainted
         raise Exceptions::ImmutableInstance
@@ -184,8 +200,18 @@ module Antaeus
       end
     end
 
+    # ActiveRecord ActiveModel::Name compatibility method
+    def model_name
+      self.class
+    end
+
     def new?
       !@entity.key?('id')
+    end
+
+    # ActiveRecord ActiveModel::Name compatibility method
+    def self.param_key
+      singular_route_key.to_sym
     end
 
     def paths
@@ -194,6 +220,11 @@ module Antaeus
 
     def path_for(kind)
       self.class.path_for(kind)
+    end
+
+    # ActiveRecord ActiveModel::Model compatibility method
+    def persisted?
+      !new?
     end
 
     def reload
@@ -208,6 +239,16 @@ module Antaeus
         @tainted = false
         true
       end
+    end
+
+    # ActiveRecord ActiveModel::Name compatibility method
+    def self.route_key
+      singular_route_key.en.plural
+    end
+
+    # ActiveRecord ActiveModel::Name compatibility method
+    def self.singular_route_key
+      to_underscore(self.name.split('::').last)
     end
 
     def save
@@ -246,6 +287,21 @@ module Antaeus
 
     def tainted?
       @tainted ? true : false
+    end
+
+    # ActiveRecord ActiveModel::Conversion compatibility method
+    def to_key
+      new? ? [] : [id]
+    end
+
+    # ActiveRecord ActiveModel::Conversion compatibility method
+    def to_model
+      self
+    end
+
+    # ActiveRecord ActiveModel::Conversion compatibility method
+    def to_param
+      new? ? nil : id.to_s
     end
 
     def <=>(other)

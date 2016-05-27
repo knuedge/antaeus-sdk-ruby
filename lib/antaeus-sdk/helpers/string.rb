@@ -16,5 +16,9 @@ module Antaeus
     def to_camel(string)
       string.split('_').map(&:capitalize).join
     end
+
+    def humanize(string)
+      string.to_s.gsub(/_id$/, "").gsub(/_/, " ").capitalize
+    end
   end
 end
