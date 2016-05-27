@@ -12,6 +12,8 @@ Linguistics.use(:en)
 # External Requirements
 require 'crypt/blowfish'
 require 'rest-client'
+require 'will_paginate'
+require 'will_paginate/array'
 
 # Internal Requirements
 require 'antaeus-sdk/helpers/string'

@@ -86,6 +86,11 @@ module Antaeus
       end
     end
 
+    # Pass pagination through to the Array (which passes to will_paginate)
+    def paginate(*args)
+      @list.paginate(*args)
+    end
+
     # Returns the number of Resource instances in the collection
     # @return [Fixnum]
     def size
