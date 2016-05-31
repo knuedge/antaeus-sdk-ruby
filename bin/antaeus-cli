@@ -28,4 +28,6 @@ else
   exit 1
 end
 
-Pry.start binding, :prompt => [ proc { "(antaeus)> " }, proc { "(antaeus)*" } ]
+Pry.config.prompt = [ proc { "(antaeus)> " }, proc { "(antaeus)*" } ]
+
+binding.pry

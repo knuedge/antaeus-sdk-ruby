@@ -41,6 +41,7 @@ require 'antaeus-sdk/config'
 Antaeus.config.load # Load config before requiring other classes
 
 require 'antaeus-sdk/api_client'
+require 'antaeus-sdk/api_info'
 require 'antaeus-sdk/guest_api_client'
 require 'antaeus-sdk/user_api_client'
 require 'antaeus-sdk/resource'

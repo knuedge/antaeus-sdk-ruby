@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
     'bin/antaeus-cli',
     'lib/antaeus-sdk.rb',
     'lib/antaeus-sdk/api_client.rb',
+    'lib/antaeus-sdk/api_info.rb',
     'lib/antaeus-sdk/config.rb',
     'lib/antaeus-sdk/exception.rb',
     'lib/antaeus-sdk/exceptions/approval_change_failed.rb',

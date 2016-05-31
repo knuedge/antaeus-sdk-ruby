@@ -316,6 +316,34 @@ module Antaeus
       end
     end
 
+    # ActiveRecord ActiveModel compatibility method
+    def update(params)
+      new_params = {}
+      # need to convert multi-part datetime params
+      params.each do |key, value|
+        if key.match /([^(]+)\(1i/
+          actual_key = key.match(/([^(]+)\(/)[1]
+          new_params[actual_key] = DateTime.new(
+            params["#{actual_key}(1i)"].to_i,
+            params["#{actual_key}(2i)"].to_i,
+            params["#{actual_key}(3i)"].to_i,
+            params["#{actual_key}(4i)"].to_i,
+            params["#{actual_key}(5i)"].to_i
+          )
+        elsif key.match /([^(]+)\(/
+          # skip this... already got it
+        else
+          new_params[key] = value
+        end
+      end
+          
+      new_params.each do |key, value|
+        raise Exceptions::InvalidProperty unless self.class.properties.include?(key.to_sym)
+        send("#{key}=".to_sym, value)
+      end
+      save
+    end
+
     private
 
     def self.validate_options(options)
