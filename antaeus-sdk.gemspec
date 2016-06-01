@@ -1,6 +1,10 @@
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require 'antaeus-sdk/version'
+
 Gem::Specification.new do |s|
   s.name        = 'antaeus-sdk'
-  s.version     = '0.0.3'
+  s.version     = Antaeus::SDK.version
   s.date        = Time.now.strftime('%Y-%m-%d')
   s.summary     = 'Antaeus Guest Management SDK'
   s.description = 'The Ruby SDK for the Antaeus Guest Management SDK'
@@ -41,6 +45,7 @@ Gem::Specification.new do |s|
     'lib/antaeus-sdk/resources/remote_application.rb',
     'lib/antaeus-sdk/resources/user.rb',
     'lib/antaeus-sdk/user_api_client.rb',
+    'lib/antaeus-sdk/version.rb',
     'LICENSE'
   ]
   s.executables << 'antaeus-cli'

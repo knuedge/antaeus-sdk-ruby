@@ -16,6 +16,7 @@ require 'will_paginate'
 require 'will_paginate/array'
 
 # Internal Requirements
+require 'antaeus-sdk/version'
 require 'antaeus-sdk/helpers/string'
 include Antaeus::Helpers
 

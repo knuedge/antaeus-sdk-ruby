@@ -1,6 +1,7 @@
 module Antaeus
   module Resources
     class User < Resource
+      property :display_name
       delayed_property { Antaeus.config.user_mail_attribute || :mail }
 
       path      :all, '/users'
