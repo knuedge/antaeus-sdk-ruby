@@ -6,22 +6,22 @@ module Antaeus
       options[:client].get('/info/version')['api']['version']
     end
 
-    def self.status
+    def self.status(options = {})
       validate_options(options)
 
       options[:client].get('/info/status')['api']['status']
     end
 
-    def self.capabilities
+    def self.capabilities(options = {})
       validate_options(options)
 
       options[:client].get('/info/capabilities')['api']['capabilities']
     end
 
-    def self.metrics
+    def self.metrics(options = {})
       validate_options(options)
 
-      options[:client].get('/info/capabilities')['api']['capabilities']
+      options[:client].get('/info/metrics')['api']['metrics']
     end
 
     private
