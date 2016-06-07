@@ -70,7 +70,11 @@ module Antaeus
             reload
           end
           if opts[:type] && opts[:type] == :time
-            @entity[prop.to_s] ? Time.parse(@entity[prop.to_s]) : nil
+            if @entity[prop.to_s] && !@entity[prop.to_s].to_s.empty?
+             Time.parse(@entity[prop.to_s].to_s)
+            else
+             nil
+           end
           else
             @entity[prop.to_s]
           end
@@ -80,7 +84,11 @@ module Antaeus
         unless prop.match /\?$/ || opts[:read_only]
           define_method("#{prop}=".to_sym) do |value|
             raise Exceptions::ImmutableModification if immutable?
-            @entity[prop.to_s] = value
+            if opts[:type] == :time
+              @entity[prop.to_s] = Time.parse(value.to_s).utc
+            else
+              @entity[prop.to_s] = value
+            end
             @tainted = true
           end
         end
@@ -127,7 +135,7 @@ module Antaeus
     def self.where(attribute, value, options = {})
       validate_options(options)
       options[:comparison] ||= '=='
-      all(lazy: false, client: options[:client]).where(attribute, value, comparison: options[:comparison])
+      all(lazy: (options[:lazy] ? true : false), client: options[:client]).where(attribute, value, comparison: options[:comparison])
     end
 
     def destroy
@@ -338,7 +346,7 @@ module Antaeus
       end
           
       new_params.each do |key, value|
-        raise Exceptions::InvalidProperty unless self.class.properties.include?(key.to_sym)
+        raise Exceptions::InvalidProperty unless self.respond_to?("#{key}=".to_sym)
         send("#{key}=".to_sym, value)
       end
       save

@@ -78,7 +78,7 @@ module Antaeus
       begin
         yield if connect
       rescue RestClient::Exception => e
-        raise e unless e.http_code == 401 # This rescue only helps with token refreshing
+        raise e, e.response unless e.http_code == 401 # This rescue only helps with token refreshing
         refresh_token
         yield if connect
       end

@@ -6,6 +6,7 @@ module Antaeus
       property :contact
       property :departure,  type: :time
       property :location
+      property :guest_id
       property :created_at, read_only: true, type: :time
       property :arrived?,   read_only: true
       property :approved?,  read_only: true
