@@ -5,7 +5,7 @@ module Antaeus
       property :comment
       property :contact
       property :departure,  type: :time
-      property :location
+      property :location_id
       property :guest_id
       property :created_at, read_only: true, type: :time
       property :arrived?,   read_only: true
@@ -63,6 +63,21 @@ module Antaeus
           guest_or_guest_id.id
         else
           guest_or_guest_id
+        end
+        @tainted = true
+      end
+
+      # Hidden property used to lookup related resource
+      def location
+        Location.get(@entity['location_id'], client: @client)
+      end
+
+      # Set the location associated with this appointment
+      def location=(location_or_location_id)
+        @entity['location_id'] = if location_or_location_id.is_a?(Location)
+          location_or_location_id.id
+        else
+          location_or_location_id
         end
         @tainted = true
       end

@@ -42,6 +42,7 @@ Gem::Specification.new do |s|
     'lib/antaeus-sdk/resources/appointment.rb',
     'lib/antaeus-sdk/resources/guest.rb',
     'lib/antaeus-sdk/resources/group.rb',
+    'lib/antaeus-sdk/resources/location.rb',
     'lib/antaeus-sdk/resources/remote_application.rb',
     'lib/antaeus-sdk/resources/user.rb',
     'lib/antaeus-sdk/user_api_client.rb',

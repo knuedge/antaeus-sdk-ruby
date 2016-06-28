@@ -30,9 +30,11 @@ module Antaeus
       end
 
       def available_appointments(location)
+        upcoming_appointments.where(location: location)
       end
 
       def upcoming_appointments
+        Appointment.upcoming(client: client).where(:guest_id, id)
       end
     end
   end
