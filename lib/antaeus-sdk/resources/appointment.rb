@@ -8,6 +8,7 @@ module Antaeus
       property :location_id
       property :guest_id
       property :created_at, read_only: true, type: :time
+      property :created_by, read_only: true
       property :arrived?,   read_only: true
       property :approved?,  read_only: true
 

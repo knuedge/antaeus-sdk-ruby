@@ -24,6 +24,12 @@ module Antaeus
       options[:client].get('/info/metrics')['api']['metrics']
     end
 
+    def self.me(options = {})
+      validate_options(options)
+
+      options[:client].get('/info/me')['current_user']
+    end
+
     private
 
     def self.validate_options(options)
