@@ -61,6 +61,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'rest-client', '~> 1.8'
   s.add_runtime_dependency 'linguistics', '~> 2.1'
   s.add_runtime_dependency 'pry',         '~> 0.10'
+  s.add_runtime_dependency 'addressable', '~> 2.4'
   s.add_runtime_dependency 'will_paginate', '~> 3.1'
 
   s.add_development_dependency 'rspec',   '~> 3.1'

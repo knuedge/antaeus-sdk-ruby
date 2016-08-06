@@ -29,25 +29,25 @@ module Antaeus
 
     def delete(uri)
       client_action do
-        raw[uri].delete
+        raw[Addressable::URI.escape(uri)].delete
       end
     end
 
     def get(uri)
       client_action do
-        JSON.load raw[uri].get
+        JSON.load raw[Addressable::URI.escape(uri)].get
       end
     end
 
     def post(uri, data)
       client_action do
-        JSON.load raw[uri].post(data.to_json)
+        JSON.load raw[Addressable::URI.escape(uri)].post(data.to_json)
       end
     end
 
     def patch(uri, data)
       client_action do
-        response = raw[uri].patch(data.to_json)
+        response = raw[Addressable::URI.escape(uri)].patch(data.to_json)
         if response && !response.empty?
           JSON.load(response)
         else
@@ -58,7 +58,7 @@ module Antaeus
 
     def put(uri, data)
       client_action do
-        raw[uri].put data.to_json
+        raw[Addressable::URI.escape(uri)].put data.to_json
       end
     end
 

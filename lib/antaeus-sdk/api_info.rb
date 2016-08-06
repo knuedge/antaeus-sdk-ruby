@@ -18,6 +18,12 @@ module Antaeus
       options[:client].get('/info/capabilities')['api']['capabilities']
     end
 
+    def self.plugins(options = {})
+      validate_options(options)
+
+      options[:client].get('/info/plugins')['api']['plugins']
+    end
+
     def self.metrics(options = {})
       validate_options(options)
 

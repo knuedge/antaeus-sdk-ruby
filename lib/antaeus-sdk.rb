@@ -14,6 +14,7 @@ require 'crypt/blowfish'
 require 'rest-client'
 require 'will_paginate'
 require 'will_paginate/array'
+require 'addressable/uri'
 
 # Internal Requirements
 require 'antaeus-sdk/version'
