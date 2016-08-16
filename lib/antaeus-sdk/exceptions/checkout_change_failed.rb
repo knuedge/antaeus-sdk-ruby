@@ -1,6 +1,6 @@
 module Antaeus
   module Exceptions
-    class CheckinFailed < Exception
+    class CheckoutChangeFailed < Exception
     end
   end
 end

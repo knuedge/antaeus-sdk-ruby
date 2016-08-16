@@ -11,6 +11,7 @@ module Antaeus
       property :created_by, read_only: true
       property :arrived?,   read_only: true
       property :approved?,  read_only: true
+      property :departed?,  read_only: true
 
       path :all, '/appointments'
 
@@ -47,7 +48,18 @@ module Antaeus
         if @client.patch("#{path_for(:all)}/#{id}/checkin", email: guest.email)
           true
         else
-          raise Exceptions::CheckinFailed
+          raise Exceptions::CheckinChangeFailed
+        end
+        reload
+        return true
+      end
+
+      # Checkout a Guest
+      def checkout
+        if @client.patch("#{path_for(:all)}/#{id}/checkout", email: guest.email)
+          true
+        else
+          raise Exceptions::CheckoutChangeFailed
         end
         reload
         return true
@@ -89,6 +101,28 @@ module Antaeus
           true
         else
           fail Exceptions::ApprovalChangeFailed
+        end
+        reload
+        return true
+      end
+
+      # Checkin a Guest
+      def undo_checkin
+        if @client.delete("#{path_for(:all)}/#{id}/checkin")
+          true
+        else
+          raise Exceptions::CheckinChangeFailed
+        end
+        reload
+        return true
+      end
+
+      # Checkout a Guest
+      def undo_checkout
+        if @client.delete("#{path_for(:all)}/#{id}/checkout")
+          true
+        else
+          raise Exceptions::CheckoutChangeFailed
         end
         reload
         return true
