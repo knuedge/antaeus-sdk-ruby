@@ -12,6 +12,8 @@ module Antaeus
       property :arrived?,   read_only: true
       property :approved?,  read_only: true
       property :departed?,  read_only: true
+      property :checkin_time, read_only: true, type: :time
+      property :checkout_time, read_only: true, type: :time
 
       path :all, '/appointments'
 
