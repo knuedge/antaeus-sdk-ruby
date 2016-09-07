@@ -32,6 +32,23 @@ module Antaeus
         )
       end
 
+      # Generate a report of appointments based on some criteria
+      def self.report(options = {})
+        validate_options(options)
+        ResourceCollection.new(
+          options[:client].post("/reports/generate", q: options[:criteria])['appointments'].collect do |record|
+            self.new(
+              entity: record,
+              lazy: false,
+              tainted: false,
+              client: options[:client]
+            )
+          end,
+          type: self,
+          client: options[:client]
+        )
+      end
+
       # Approve an Appointment
       def approve
         if @client.patch("#{path_for(:all)}/#{id}/approve", approve: true)

@@ -33,9 +33,13 @@ module Antaeus
       end
     end
 
-    def get(uri)
+    def get(uri, data = nil)
       client_action do
-        JSON.load raw[Addressable::URI.escape(uri)].get
+        if data
+          JSON.load raw[Addressable::URI.escape(uri)].get(params: data)
+        else
+          JSON.load raw[Addressable::URI.escape(uri)].get
+        end
       end
     end
 
