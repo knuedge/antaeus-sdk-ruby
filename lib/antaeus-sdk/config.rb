@@ -19,10 +19,13 @@ class Antaeus::Config < OpenStruct
     merge defaults
 
     # Then apply the config file, if one exists
-    apprc_dir = File.expand_path(File.join('~', '.antaeus'))
-    config_file = File.expand_path(File.join(apprc_dir, 'client.yml'))
-
-    merge YAML.load_file(config_file) if File.readable?(config_file)
+    begin
+      apprc_dir = File.expand_path(File.join('~', '.antaeus'))
+      config_file = File.expand_path(File.join(apprc_dir, 'client.yml'))
+      merge YAML.load_file(config_file) if File.readable?(config_file)
+    rescue => e
+      puts "Unable to read from ~/.antaeus/client.yml"
+    end
 
     # Finally, apply any environment variables specified
     env_conf = {}
