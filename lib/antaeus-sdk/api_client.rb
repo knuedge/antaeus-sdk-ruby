@@ -45,13 +45,13 @@ module Antaeus
 
     def post(uri, data)
       client_action do
-        JSON.load raw[Addressable::URI.escape(uri)].post(data.to_json)
+        JSON.load raw[Addressable::URI.escape(uri)].post(json_escape(data.to_json))
       end
     end
 
     def patch(uri, data)
       client_action do
-        response = raw[Addressable::URI.escape(uri)].patch(data.to_json)
+        response = raw[Addressable::URI.escape(uri)].patch(json_escape(data.to_json))
         if response && !response.empty?
           JSON.load(response)
         else
@@ -62,7 +62,7 @@ module Antaeus
 
     def put(uri, data)
       client_action do
-        raw[Addressable::URI.escape(uri)].put data.to_json
+        raw[Addressable::URI.escape(uri)].put(json_escape(data.to_json))
       end
     end
 
@@ -77,6 +77,20 @@ module Antaeus
     end
 
     private
+
+    def json_escape(s)
+      json_escape = {
+        '&' => '\u0026',
+        '>' => '\u003e',
+        '<' => '\u003c',
+        '%' => '\u0025',
+        "\u2028" => '\u2028',
+        "\u2029" => '\u2029'
+      }
+      json_escape_regex = /[\u2028\u2029&><%]/u
+
+      s.to_s.gsub(json_escape_regex, json_escape)
+    end
 
     def client_action(&block)
       begin
