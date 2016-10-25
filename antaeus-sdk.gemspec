@@ -49,14 +49,15 @@ Gem::Specification.new do |s|
     'lib/antaeus-sdk/resources/user.rb',
     'lib/antaeus-sdk/user_api_client.rb',
     'lib/antaeus-sdk/version.rb',
-    'LICENSE'
+    'LICENSE',
+    'README.md'
   ]
   s.executables << 'antaeus-cli'
   s.bindir      = 'bin'
   s.license     = 'MIT'
   s.platform    = Gem::Platform::RUBY
   s.post_install_message = 'Thanks for installing the Antaeus Ruby SDK!'
-  s.homepage    = 'https://stash.intellisis.com/projects/ITS/repos/antaeus-sdk-ruby/browse'
+  s.homepage    = 'https://github.com/knuedge/antaeus-sdk-ruby'
 
   # Dependencies
   s.add_runtime_dependency 'crypt',       '~> 2.2'

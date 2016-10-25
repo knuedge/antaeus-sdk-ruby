@@ -16,7 +16,9 @@ if File.readable?(config_file)
   CONFIG = YAML.load_file(config_file)
 else
   CONFIG = {
+    mode: 'singleuser',
     group_name_attribute: 'cn',
+    base_url: 'http://localhost:8080',
     login: 'username',
     password: 'passw0rd',
     debug: false
